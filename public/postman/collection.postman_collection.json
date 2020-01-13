@@ -1,0 +1,231 @@
+{
+	"info": {
+		"_postman_id": "61bc9205-054e-4396-92f8-108eac57df83",
+		"name": "COUCHBASE-TRX-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "CUSTOMERS",
+			"item": [
+				{
+					"name": "CUSTOMER - LIST",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}customers/",
+							"host": [
+								"{{server}}customers"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CUSTOMER - CREATE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ed4aa391-4c3b-42b2-ae2b-a6ec41db8e15",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"",
+									"if (responseCode.code === 200){",
+									"    var jsonData = JSON.parse(responseBody),",
+									"        hasID = responseBody.has(\"id\");",
+									"        ",
+									"    tests[\"Body contains Customer ID\"] = hasID;",
+									"    ",
+									"    if (hasID){",
+									"        postman.setEnvironmentVariable(\"customer_id\", jsonData.id);",
+									"        postman.setEnvironmentVariable(\"address_id\", jsonData.addresses[0].id);",
+									"    }",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\"     : \"Giancarlo\",\n    \"lastName\"      : \"Gomez\",\n    \"phone\" \t\t: \"+1-305-610-9428\",\n    \"email\"         : \"giancarlo.gomez@gmail.com\",\n    \"addresses\" \t: [\n    \t{\n    \t\t\"purpose\"   : \"billing\",\n\t\t    \"street\"    : \"1070 Belvoir Way\",\n\t\t    \"city\"\t\t: \"Spring Hill\",\n\t\t    \"state\"     : \"FL\",\n\t\t    \"country\"   : \"USA\",\n\t\t    \"postcode\"  : \"34609\"\n    \t},\n    \t{\n    \t\t\"purpose\"   : \"shipping\",\n\t\t    \"street\"    : \"1070 Belvoir Way\",\n\t\t    \"city\"\t\t: \"Spring Hill\",\n\t\t    \"state\"     : \"FL\",\n\t\t    \"country\"   : \"USA\",\n\t\t    \"postcode\"  : \"34609\"\n    \t}\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}customers/",
+							"host": [
+								"{{server}}customers"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CUSTOMER - UPDATE",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\"     : \"Giancarlo\",\n    \"lastName\"      : \"Gomez\",\n    \"phone\" \t\t: \"+1-305-610-9428\",\n    \"email\"         : \"giancarlo.gomez@gmail.com\",\n    \"addresses\" \t: [\n    \t{\n    \t\t\"id\"\t\t: \"{{address_id}}\",\n    \t\t\"purpose\"   : \"billing\",\n\t\t    \"street\"    : \"1070 Belvoir Way\",\n\t\t    \"city\"\t\t: \"Spring Hill\",\n\t\t    \"state\"     : \"FL\",\n\t\t    \"country\"   : \"USA\",\n\t\t    \"postcode\"  : \"34609\"\n    \t},\n    \t{\n    \t\t\"purpose\"   : \"vacation\",\n\t\t    \"street\"    : \"125 Main Ave\",\n\t\t    \"city\"\t\t: \"New York\",\n\t\t    \"state\"     : \"NY\",\n\t\t    \"country\"   : \"USA\",\n\t\t    \"postcode\"  : \"20002\"\n    \t}\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}customers/{{customer_id}}",
+							"host": [
+								"{{server}}customers"
+							],
+							"path": [
+								"{{customer_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CUSTOMER - GET",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}customers/{{customer_id}}",
+							"host": [
+								"{{server}}customers"
+							],
+							"path": [
+								"{{customer_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CUSTOMER - DELETE",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{server}}customers/{{customer_id}}",
+							"host": [
+								"{{server}}customers"
+							],
+							"path": [
+								"{{customer_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "TRANSACTIONS",
+			"item": [
+				{
+					"name": "TRANSACTION - LIST",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}transactions/",
+							"host": [
+								"{{server}}transactions"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TRANSACTION - CREATE",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"customerID\"    : \"{{customer_id}}\",\n\t\"amount\"        : 100,\n\t\"currency\"\t\t: \"usd\",\n\t\"card\"\t \t\t: {\n\t\t\"number\"\t: \"4242424242424242\",\n\t\t\"exp_month\" : 8,\n\t\t\"exp_year\"  : 2021,\n\t\t\"cvc\"   \t: \"123\"\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}transactions/",
+							"host": [
+								"{{server}}transactions"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TRANSACTION - GET",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}transactions/{{transaction_id}}",
+							"host": [
+								"{{server}}transactions"
+							],
+							"path": [
+								"{{transaction_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
