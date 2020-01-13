@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>App</title>
+    <link rel="stylesheet" href="/styles/bootstrap.4.4.1.min.css"></link>
+    <link rel="stylesheet" href="/styles/datatables.1.10.20.min.css"></link>
+    <link rel="stylesheet" href="/styles/app.css"></link>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-sm-12 text-center" href="#">CB TRX</a>
+    </nav>
+    <!-- main view -->
+    <main role="main" >
+        <ul class="nav justify-content-center nav-tabs" id="tab-nav" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link" id="transactions-tab" data-toggle="tab" href="#transactions" role="tab" aria-controls="transactions" aria-selected="true">
+                    <span data-feather="list"></span>
+                    Transactions <span class="sr-only">(current)</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="customers-tab" data-toggle="tab" href="#customers" role="tab" aria-controls="customers" aria-selected="false">
+                    <span data-feather="users"></span>
+                    Customers
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content" id="tab-content">
+            <!-- transactions ui -->
+            <div class="tab-pane fade" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
+                <div class="container">
+                    <button type="button" class="btn btn-block btn-success mb-2" id="new-transaction">
+                        <span data-feather="plus"></span> NEW CHARGE
+                    </button>
+                    <!-- filter -->
+                    <div class="card card-body bg-light mb-2">
+                        <form class="form-inline" id="transactions-filter">
+                            <div class="form-group">
+                                <label for="trx_sch_type">Where</label>
+                                <select class="form-control" type="text" id="trx_sch_type" name="trx_sch_type">
+                                    <option value="id">Transaction ID</option>
+                                    <option value="customerID">Customer ID</option>
+                                    <option value="transactionID">Stripe ID</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="trx_sch_id">Is</label>
+                                <input class="form-control" type="text" id="trx_sch_id" name="trx_sch_id" placeholder="">
+                            </div>
+                            <div class="form-group">
+                                <label for="trx_sch_date_from">From</label>
+                                <input class="form-control" type="date" id="trx_sch_date_from" name="trx_sch_date_from" placeholder="mm/dd/yyyy">
+                            </div>
+                            <div class="form-group">
+                                <label for="trx_sch_date_to">To</label>
+                                <input class="form-control" type="date" id="trx_sch_date_to" name="trx_sch_date_to" placeholder="mm/dd/yyyy">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- datatable -->
+                    <table id="transactions-data" class="table"></table>
+                </div>
+            </div>
+            <!-- customers ui -->
+            <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">
+                <div class="container">
+                    <button type="button" class="btn btn-block btn-success mb-2" id="new-customer">
+                        <span data-feather="plus"></span> NEW CUSTOMER
+                    </button>
+                    <!-- filter -->
+                    <div class="card card-body bg-light mb-2">
+                        <form class="form-inline" id="customers-filter">
+                            <div class="form-group">
+                                <label for="cst_sch_type">Where</label>
+                                <select class="form-control" type="text" id="cst_sch_type" name="cst_sch_type">
+                                    <option value="id">Customer ID</option>
+                                    <option value="name">Name</option>
+                                    <option value="email">Email</option>
+                                    <option value="address">Address</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cst_sch_value">Like</label>
+                                <input class="form-control long" type="text" id="cst_sch_value" name="cst_sch_value" placeholder="">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- datatable -->
+                    <table id="customers-data" class="table" style="width:100%"></table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- modals -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="transaction-create-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form>
+                    <div class="modal-header">
+                        <h5 class="modal-title">NEW CHARGE</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="name" id="cc-name"/>
+                        <div class="card-wrapper"></div>
+                        <div class="form-group">
+                            <select name="customer" class="form-control" id="customer-select" required>
+                            </select>
+                            <input type="text" class="form-control" id="cc-number" name="number" placeholder="CARD NUMBER" required />
+                            <input type="text" class="form-control" id="cc-expiry" name="expiry" placeholder="MM/YY" required />
+                            <input type="text" class="form-control" id="cc-cvc" name="cvc" maxlength="4" placeholder="CVC" required />
+                            <input type="number" class="form-control" id="cc-amount" name="amount"  placeholder="AMOUNT" step=".01" min="0" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success btn-block">CHARGE</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="transaction-modal">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <form>
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-2" role="dialog" id="customer-modal">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <form>
+                    <input type="hidden" name="_id" value="" />
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" name="firstName" id="customer_firstname" class="form-control form-control-sm" value="" required="true" placeholder="First Name" aria-label="First Name" />
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="lastName" id="customer_lastname" class="form-control form-control-sm" value="" required="true" placeholder="Last Name" aria-label="Last Name" />
+                        </div>
+                        <div class="form-group">
+                            <input type="email" name="email" id="customer_email" class="form-control form-control-sm" value="" required="true" placeholder="Email" aria-label="Email" />
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" name="phone" id="customer_phone" class="form-control form-control-sm" value="" placeholder="Phone" aria-label="Phone" />
+                        </div>
+                        <div id="customer_addresses"></div>
+                        <div class="text-right">
+                            <button type="button" class="btn btn-sm btn-link text-success" data-action="add-address">&plus; ADD ADDRESS</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-block btn-primary">SAVE</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-2" role="dialog" id="delete-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <input type="hidden" name="_id" value="" />
+                <div class="modal-header">
+                    <h5 class="modal-title">DELETE RECORD</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-block btn-danger" data-delete="true">CONTINUE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-3" role="dialog" id="alert-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <input type="hidden" name="_id" value="" />
+                <div class="modal-header">
+                    <h5 class="modal-title">ATTENTION</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- for toasts -->
+    <div aria-live="polite" aria-atomic="true" id="toasts"></div>
+    <script src="/scripts/feather.4.9.0.min.js"></script>
+    <script src="/scripts/moment.2.24.0.min.js"></script>
+    <script src="/scripts/jquery.3.4.1.min.js"></script>
+    <script src="/card/jquery.card.js"></script>
+    <script src="/scripts/bootstrap.4.4.1.min.js"></script>
+    <script src="/scripts/datatables.1.10.20.min.js"></script>
+    <script src="/scripts/app.js"></script>
+</body>
+</html>

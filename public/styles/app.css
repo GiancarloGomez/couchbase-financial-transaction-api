@@ -1,0 +1,101 @@
+body {
+    font-size: .875rem;
+}
+
+.feather {
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+}
+
+.navbar-brand {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    font-size: 1rem;
+    background-color: rgba(0, 0, 0, .25);
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+}
+
+main {
+    padding-top: 1em;
+}
+
+main .container {
+    padding:1em;
+}
+
+.form-inline {
+    align-items: stretch;
+    justify-content: center;
+}
+
+.form-inline .form-group {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    margin-right: 5px;
+}
+
+.form-inline .form-group label {
+    color:var(--gray);
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.form-inline .form-control.long {
+    min-width:40vw;
+}
+
+#toasts {
+    position: absolute;
+    top:60px;
+    right:10px;
+}
+
+fieldset + fieldset {
+    margin-top:1em;
+}
+
+.card-wrapper + .form-group{
+    max-width: 350px;
+    margin: 1em auto;
+    padding:0;
+}
+.card-wrapper + .form-group .form-control {
+    margin-bottom: 10px;
+}
+
+#transaction-modal .modal-body {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+#transaction-modal .modal-body > div {
+    width:calc(50% - 10px);
+}
+#transaction-modal label {
+    margin:0 0 5px;
+    font-weight:600;
+}
+#transaction-modal pre {
+    margin-top:10px;
+}
+#transaction-modal .form-group {
+    margin-bottom: 10px;
+}
+#transaction-modal .form-control-plaintext {
+    padding:0;
+}
+
+.modal-title {
+    line-height: 1.2;
+}
+.modal-title small {
+    color:#aaa;
+}
+
+@media (max-width:1199px) {
+    #transaction-modal .modal-body > div {
+        width:100%
+    }
+}
