@@ -5,9 +5,10 @@ module.exports = () => {
         'type'          : 'address',
         'purpose'       : 'billing',
         'street'        : '',
+        'city'          : '',
         'state'         : '',
-        'country'       : 'US',
         'postcode'      : '',
+        'country'       : 'US',
         'createdOn'     : '',
         'updatedOn'     : ''
     }

@@ -23,11 +23,11 @@
     * Transactions Namespace
     */
     const Transactions = {
-
-        apiEndpoint     : '/transactions/',
+        apiEndpoint     : '/api/transactions/',
         customerSelect  : null,
         datatable       : null,
         filterForm      : null,
+        filterReset     : null,
         form            : null,
         loaded          : false,
         modal           : null,
@@ -48,13 +48,20 @@
             _this.filterForm = $('#transactions-filter').on('submit',function(){
                 _this.filter();
                 return false;
-            })
+            });
+
+            _this.filterReset = _this.filterForm.find('[data-reset]').on('click',function(){
+                _this.filterReset.addClass('invisible');
+                _this.filterForm.get(0).reset();
+                _this.filter();
+                return false;
+            });
 
             _this.table = $('#transactions-data').on('click','button[data-id]',function(e){
                 e.preventDefault();
                 _this.openModal(this.dataset);
             });
-            ;
+
             _this.customerSelect = $('#customer-select').on('change',function(){
                 let ccname = document.getElementById('cc-name');
                 ccname.value = this.options[this.selectedIndex].innerHTML;
@@ -106,6 +113,11 @@
             if (_form.trx_sch_date_to.value)
                 params.to = moment(_form.trx_sch_date_to.value + ' 23:59:59').utc().format();
 
+            if (Object.keys(params).length)
+                _this.filterReset.removeClass('invisible');
+            else
+                _this.filterReset.addClass('invisible');
+
             _this.fetch(params);
         },
 
@@ -133,7 +145,7 @@
                     lengthChange: false,
                     pageLength: 25,
                     data: data,
-                    order : [[ 3, "asc" ]],
+                    order : [[ 3, "desc" ]],
                     columns: [
                         {
                             data: 'amount',
@@ -166,7 +178,7 @@
                             title:'DATE',
                             class:'text-right',
                             render: (data, type, row, meta) => {
-                                return moment(data).format('MMM D, YYYY h:mm A')
+                                return type === 'sort' ? data : moment(data).format('MMM D, YYYY h:mm A');
                             }
                         },
                         {
@@ -298,12 +310,12 @@
     * Customers Namespace
     */
     const Customers = {
-
-        apiEndpoint     : '/customers/',
+        apiEndpoint     : '/api/customers/',
         data            : null,
         datatable       : null,
         deleteModal     : null,
         filterForm      : null,
+        filterReset     : null,
         form            : null,
         loaded          : false,
         modal           : null,
@@ -327,7 +339,14 @@
             _this.filterForm = $('#customers-filter').on('submit',function(){
                 _this.filter();
                 return false;
-            })
+            });
+
+            _this.filterReset = _this.filterForm.find('[data-reset]').on('click',function(){
+                _this.filterReset.addClass('invisible');
+                _this.filterForm.get(0).reset();
+                _this.filter();
+                return false;
+            });
 
             _this.deleteModal = $('#delete-modal')
                                 .modal({backdrop:'static',keyboard:false,show:false})
@@ -388,12 +407,15 @@
             let params  = {};
             let _form   = _this.filterForm.get(0);
 
-            console.log(_form.cst_sch_value.value);
-
             if (_form.cst_sch_value.value){
                 params.type = _form.cst_sch_type.value;
                 params.value = _form.cst_sch_value.value;
             }
+
+            if (Object.keys(params).length)
+                _this.filterReset.removeClass('invisible');
+            else
+                _this.filterReset.addClass('invisible');
 
             _this.fetch(null,params);
         },
@@ -406,7 +428,6 @@
                 _this.loaded = true;
             // set to 0 for no paging
             params.limit = 0;
-            console.log(params)
             $.ajax({
                 url : _this.apiEndpoint,
                 data : params

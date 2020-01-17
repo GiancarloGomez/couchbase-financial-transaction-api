@@ -74,9 +74,12 @@ const CouchbaseService = {
         let promise;
         let result;
         let searchValue;
+        let keys;
+        let searchQuery;
 
         // get count since we are requesting a paged resultset
-        if (paged){
+        // not currently used in search
+        if (paged && !searchparams.value){
             query = couchbase.N1qlQuery.fromString(`SELECT COUNT(id) AS total ${where}`);
 
             promise = new Promise ((resolve,reject) => {
@@ -91,29 +94,50 @@ const CouchbaseService = {
                 total = result.total;
         }
 
+        // FTS Search
+        if (searchparams.value){
+            searchQuery = couchbase.SearchQuery;
+            switch (searchparams.type){
+                case 'id':
+                case 'email':
+                    query = searchQuery.new(`customer-search-${searchparams.type}`, searchQuery.matchPhrase(searchparams.value));
+                break;
+                case 'name':
+                    query = searchQuery.new(`customer-search-${searchparams.type}`, searchQuery.match(searchparams.value));
+                break;
+                case 'address':
+                    query = searchQuery.new('address-search', searchQuery.matchPhrase(searchparams.value));
+                break;
+            }
+            promise = new Promise ((resolve,reject) => {
+                bucket.query(query,(err,rows)=>{
+                   resolve(err ? err : rows);
+                });
+            });
+
+            result = await promise;
+
+            if (searchparams.type === 'address')
+                keys = JSON.stringify(result.map( a => a.id.replace('address::','') ));
+            else
+                keys = JSON.stringify(result.map( a => a.id ));
+        }
+
         // fetch records ( full or paged )
         if (!paged || (!result.code && result.total)){
             if (searchparams.value) {
                 searchValue = searchparams.value.toString().toLowerCase();
                 switch (searchparams.type){
                     case 'id':
-                        where += ` AND id LIKE '${searchValue}%' `;
-                    break;
-
                     case 'email':
-                        where += ` AND LOWER(TOSTRING(email)) LIKE '${searchValue}%' `;
-                    break;
-
                     case 'name':
-                        where += ` AND LOWER(TOSTRING(firstName||' '||lastName)) LIKE '%${searchValue}%' `;
+                        where = `FROM \`transaction-app\` USE KEYS ${keys}`;
                     break;
 
                     default:
                         where += `
                         AND ANY v in addresses SATISFIES v.id IN (
-                            SELECT  RAW x.id
-                            FROM    \`transaction-app\` x
-                            WHERE   x.type = 'address' AND LOWER(TOSTRING(x.street||x.city||x.state)) LIKE '%${searchValue}%'
+                            ${keys}
                         ) END`;
                     break;
                 }
@@ -233,12 +257,18 @@ const CouchbaseService = {
             `;
 
             // set up search
+            if (searchparams.from && searchparams.to)
+                query += `AND a.createdOn BETWEEN '${searchparams.from}' AND '${searchparams.to}'`;
+            else if (searchparams.from)
+                query += `AND a.createdOn BETWEEN '${searchparams.from}' AND '${moment().add(1,'d').utc().format()}'`;
+            else if (searchparams.to)
+                query += `AND a.createdOn <= '${searchparams.to}'`;
+
+            // on single lookup field lookup remove order by to shave off some ms
             if (searchparams.id && searchparams.field)
                 query += `AND a.${searchparams.field} = '${searchparams.id}'`;
-            if (searchparams.from)
-                query += `AND a.createdOn >= '${searchparams.from}'`;
-            if (searchparams.to)
-                query += `AND a.createdOn <= '${searchparams.to}'`;
+            else
+                query += ' ORDER BY a.createdOn DESC ';
 
             if (paged)
                 query += `OFFSET ${offset} LIMIT ${limit}`;

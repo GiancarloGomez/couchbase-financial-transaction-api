@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/customers', customersRouter);
-app.use('/transactions', transactionsRouter);
+app.use('/api/customers', customersRouter);
+app.use('/api/transactions', transactionsRouter);
 
 app.listen(port);

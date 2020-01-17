@@ -6,6 +6,7 @@ module.exports = () => {
         'firstName'     : '',
         'lastName'      : '',
         'email'         : '',
+        'phone'         : '',
         'addresses'     : [],
         'createdOn'     : '',
         'updatedOn'     : ''
