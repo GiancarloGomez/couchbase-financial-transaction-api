@@ -96,17 +96,21 @@ const CouchbaseService = {
 
         // FTS Search
         if (searchparams.value){
+            searchValue = searchparams.value.toString();
             searchQuery = couchbase.SearchQuery;
             switch (searchparams.type){
                 case 'id':
                 case 'email':
-                    query = searchQuery.new(`customer-search-${searchparams.type}`, searchQuery.matchPhrase(searchparams.value));
+                    query = searchQuery.new(`customer-search-${searchparams.type}`, searchQuery.matchPhrase(searchValue));
                 break;
                 case 'name':
-                    query = searchQuery.new(`customer-search-${searchparams.type}`, searchQuery.match(searchparams.value));
+                    if (searchValue.indexOf(' ') !== -1)
+                        query = searchQuery.new(`customer-search-${searchparams.type}`, searchQuery.match(searchValue));
+                    else
+                        query = searchQuery.new(`customer-search-${searchparams.type}`, searchQuery.wildcard(`${searchValue.toLowerCase()}*`));
                 break;
                 case 'address':
-                    query = searchQuery.new('address-search', searchQuery.matchPhrase(searchparams.value));
+                    query = searchQuery.new('address-search', searchQuery.matchPhrase(searchValue));
                 break;
             }
             promise = new Promise ((resolve,reject) => {
@@ -126,7 +130,6 @@ const CouchbaseService = {
         // fetch records ( full or paged )
         if (!paged || (!result.code && result.total)){
             if (searchparams.value) {
-                searchValue = searchparams.value.toString().toLowerCase();
                 switch (searchparams.type){
                     case 'id':
                     case 'email':

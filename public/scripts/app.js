@@ -629,12 +629,13 @@
                 // fetch updated records
                 _this.fetch();
                 _this.modal.modal('hide');
+                Notification.toast(`Record for ${_form.firstName.value} ${_form.lastName.value} saved.`,'CUSTOMER',6000,true);
             })
             .fail( error => {
                 Notification.toast(error.responseJSON.message);
             })
             .always( () => {
-                submitBtn.text('CHARGE').attr('disabled',false);
+                submitBtn.text('SAVE').attr('disabled',false);
             });
         },
 
